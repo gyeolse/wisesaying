@@ -1,0 +1,8 @@
+0000000000000000000000000000000000000000 3269e27d3dd26c3431a344bfce8055f830390a49 gyeolse <segylee5030@gmail.com> 1721749780 +0900	clone: from https://github.com/gyeolse/androidTemplate.git
+3269e27d3dd26c3431a344bfce8055f830390a49 5ca7e0fea9d647d294b089b1b651d4e9dc9623f9 gyeolse <segylee5030@gmail.com> 1721749892 +0900	commit: [ADD] : Add Android Template Projects
+5ca7e0fea9d647d294b089b1b651d4e9dc9623f9 6e313cf87788142493c8935e789dd9b0462c5c2c gyeolse <segylee5030@gmail.com> 1721893174 +0900	commit: [ENH] Delete TodoRepositoryImpl
+6e313cf87788142493c8935e789dd9b0462c5c2c 5f64e59792d88b5e9fe7c59bed623322009a5d8f gyeolse <segylee5030@gmail.com> 1721900889 +0900	commit: [ENH] Apply Dependncy Injection using hilt
+5f64e59792d88b5e9fe7c59bed623322009a5d8f 9bf049988d92a0c3f5dbb87fabad233b79096445 gyeolse <segylee5030@gmail.com> 1721922415 +0900	commit: [ENH] : Add SplashScreen
+9bf049988d92a0c3f5dbb87fabad233b79096445 0064cc6c72b0150ba0a7ad2ae9245569b3987849 gyeolse <segylee5030@gmail.com> 1722074681 +0900	commit: [ENH] Add Custom Splash Screen
+0064cc6c72b0150ba0a7ad2ae9245569b3987849 67a61aa0e3ed0c7d5ed144616b39ab661ad72b59 gyeolse <segylee5030@gmail.com> 1722436982 +0900	commit: [ENH] : Add Kakaotalk Login API's
+67a61aa0e3ed0c7d5ed144616b39ab661ad72b59 7dbfae70de349111f3894ee11e6bc4d02586ee62 gyeolse <segylee5030@gmail.com> 1722521828 +0900	commit: [ENH] Move Login methon to LoginRepository
