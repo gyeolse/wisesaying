@@ -1,9 +1,9 @@
 package com.example.androidsample.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.VerticalPager
@@ -24,13 +23,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,12 +48,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.androidsample.R
 import com.example.androidsample.SampleApplication
+import com.example.androidsample.data.model.WiseSaying
 import com.example.androidsample.ui.component.WiseSayingData
 import com.example.androidsample.ui.component.WiseSayingDataItem
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.TodoViewModel
+import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 import java.util.Calendar
 
 val contentsList = listOf(
@@ -68,15 +67,28 @@ val contentsList = listOf(
     WiseSayingData("고통이 남기고 간 뒤를 보라! 고난이 지나면 반드시 기쁨이 스며든다. ", "괴테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
 )
 @Composable
-fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltViewModel()) {
+fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltViewModel(),
+               wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
 
     val context = SampleApplication.appContext
+    val wiseSayings by wiseSayingViewModel.wiseSayings
+
     AndroidSampleTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            SwipeableCardView(contentsList)
+            Log.d("WiseSaying", " WiseSaying home screen 2 " + wiseSayings.size)
+            if (wiseSayings.isNotEmpty()) {
+                SwipeableCardView(wiseSayings)
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "로딩 중입니다...")
+                }
+            }
         }
     }
 }
@@ -96,154 +108,161 @@ fun DisplayContents(){
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SwipeableCardView(items: List<WiseSayingData>) {
-    val pagerState = rememberPagerState(pageCount = { contentsList.size } )
+fun SwipeableCardView(items: List<WiseSaying>) {
+    val pagerState = rememberPagerState(pageCount = { items.size } )
     var cardItems by remember { mutableStateOf(items) }
 
-    VerticalPager(
-        modifier = Modifier.fillMaxSize(),
-        state = pagerState
-    ) {page ->
-        val item = cardItems[page]
+        VerticalPager(
+            modifier = Modifier.fillMaxSize(),
+            state = pagerState
+        ) {page ->
+            val item = cardItems[page]
+            val isFlipped = false
 
-        val rotationYs by animateFloatAsState(
-            targetValue = if (item.isFlipped) 180f else 0f,
-            animationSpec = tween(durationMillis = 600), label = ""
-        )
+            val rotationYs by animateFloatAsState(
+                targetValue = if (isFlipped) 180f else 0f,
+                animationSpec = tween(durationMillis = 600), label = ""
+            )
 
-        val frontVisibility = if (rotationYs <= 90f) 1f else 0f
-        val backVisibility = if (rotationYs > 90f) 1f else 0f
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
+            val frontVisibility = if (rotationYs <= 90f) 1f else 0f
+            val backVisibility = if (rotationYs > 90f) 1f else 0f
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                cardItems = cardItems.mapIndexed { index, cardItem ->
-                                    if (index == page) {
-                                        cardItem.copy(isFlipped = !cardItem.isFlipped)
-                                    } else {
-                                        cardItem
-                                    }
-                                }
-                            }
-                        )
-                    }
-                    .graphicsLayer {
-                        rotationY = rotationYs
-                        cameraDistance = 12f * density
-                    }
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
             ) {
-                if (frontVisibility == 1f) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(400.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End,
-                            ) {
-                                IconButton(onClick = {
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = {
                                     cardItems = cardItems.mapIndexed { index, cardItem ->
                                         if (index == page) {
-                                            cardItem.copy(isFavorite = !cardItem.isFavorite)
+                                            cardItem.copy(isFlipped)
                                         } else {
                                             cardItem
                                         }
                                     }
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Favorite,
-                                        contentDescription = "Favorite",
-                                        tint = if (item.isFavorite) Color.Red else Color.Gray
-                                    )
                                 }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(text = item.contents,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 30.sp,
-                                    textAlign = TextAlign.Center,
-                                    fontStyle = FontStyle.Normal,
-                                    lineHeight = 30.sp,
-                                    color = Color.Black)
-                                Text(text = item.author,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    textAlign = TextAlign.Center,
-                                    fontStyle = FontStyle.Italic,
-                                    modifier = Modifier.padding(10.dp))
-                            }
+                            )
                         }
-                    }
-                }
-
-                if (backVisibility == 1f) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(400.dp)
-                    ) {
-                        Column(
+                        .graphicsLayer {
+                            rotationY = rotationYs
+                            cameraDistance = 12f * density
+                        }
+                ) {
+                    if (frontVisibility == 1f) {
+                        Card(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .fillMaxWidth()
+                                .height(400.dp)
                         ) {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxSize(),
+                                    .fillMaxSize()
+                                    .padding(16.dp),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(text = item.author,
-                                    modifier = Modifier.graphicsLayer {
-                                        alpha = backVisibility
-                                        rotationY = rotationYs
-                                    },
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 30.sp,
-                                    textAlign = TextAlign.Center,
-                                    fontStyle = FontStyle.Normal,
-                                    lineHeight = 30.sp,
-                                    color = Color.Black)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                ) {
+//                                IconButton(onClick = {
+//                                    cardItems = cardItems.mapIndexed { index, cardItem ->
+//                                        if (index == page) {
+//                                            cardItem.copy(isFavorite = !cardItem.isFavorite)
+//                                        } else {
+//                                            cardItem
+//                                        }
+//                                    }
+//                                }) {
+//                                    Icon(
+//                                        imageVector = Icons.Filled.Favorite,
+//                                        contentDescription = "Favorite",
+//                                        tint = if (item.isFavorite) Color.Red else Color.Gray
+//                                    )
+//                                }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    item.contents?.let {
+                                        Text(text = it,
+                                            overflow = TextOverflow.Ellipsis,
+                                            fontSize = 30.sp,
+                                            textAlign = TextAlign.Center,
+                                            fontStyle = FontStyle.Normal,
+                                            lineHeight = 30.sp,
+                                            color = Color.Black)
+                                    }
+                                    item.author?.let {
+                                        Text(text = it,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            textAlign = TextAlign.Center,
+                                            fontStyle = FontStyle.Italic,
+                                            modifier = Modifier.padding(10.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (backVisibility == 1f) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(400.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    item.author?.let {
+                                        Text(text = it,
+                                            modifier = Modifier.graphicsLayer {
+                                                alpha = backVisibility
+                                                rotationY = rotationYs
+                                            },
+                                            overflow = TextOverflow.Ellipsis,
+                                            fontSize = 30.sp,
+                                            textAlign = TextAlign.Center,
+                                            fontStyle = FontStyle.Normal,
+                                            lineHeight = 30.sp,
+                                            color = Color.Black)
+                                    }
+                                }
                             }
                         }
                     }
                 }
+
             }
-
         }
-    }
-
 }
+
 @Preview
 @Composable
 fun TestHomeScreen() {
-   SwipeableCardView(contentsList)
+//   SwipeableCardView(contentsList)
 }
