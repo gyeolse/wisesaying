@@ -1,5 +1,6 @@
 package com.example.androidsample.ui.component
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,10 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.androidsample.R
+import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 
 @Composable
-fun WiseSayingDataItem(wiseSayingData: WiseSayingData) {
+fun WiseSayingDataItem(wiseSayingData: WiseSayingData, wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
 
     Card(
         modifier = Modifier
@@ -69,7 +72,10 @@ fun WiseSayingDataItem(wiseSayingData: WiseSayingData) {
             }
 
             IconButton(
-                onClick = { /* TODO: 하트 버튼 클릭 시 동작 추가 */ },
+                onClick = {
+                    Log.d("WiseSayingDataItem", " value clicks" + wiseSayingData.uid.toString())
+                    wiseSayingViewModel.updateIsFavorite(wiseSayingData.uid)
+                          },
                 modifier = Modifier
                     .align(Alignment.TopEnd) // 카드의 오른쪽 상단에 배치
                     .padding(8.dp)

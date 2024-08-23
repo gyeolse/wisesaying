@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WiseSayingDao {
     @Query("SELECT * FROM wisesaying")
-    fun wiseSayingList(): Flow<List<WiseSaying>>
-
-    @Query("SELECT * FROM wisesaying")
     suspend fun getAll(): List<WiseSaying>
+
+    @Update
+    suspend fun updateIsFavorite(wiseSaying: WiseSaying)
 }

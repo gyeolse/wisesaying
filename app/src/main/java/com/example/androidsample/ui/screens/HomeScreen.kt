@@ -3,6 +3,7 @@ package com.example.androidsample.ui.screens
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -57,15 +58,15 @@ import com.example.androidsample.ui.viewmodel.TodoViewModel
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 import java.util.Calendar
 
-val contentsList = listOf(
-    WiseSayingData("하루에 3시간을 걸으면 7년 후에 지구를 한바퀴 돌 수 있다.", "사무엘존슨",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-    WiseSayingData("When you believe in a thing, believe in it all the way, implicitly and unquestionable.", "Walt Disney",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-    WiseSayingData("Never say goodbye because goodbye means going away and going away means forgetting", "Peter Pan",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-    WiseSayingData("Some people are worth melting for.", "Frozen(Olaf)",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-    WiseSayingData("좋은 성과를 얻으려면 한 걸음 한 걸음이 힘차고 충실하지 않으면 안 된다, ", "단테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-    WiseSayingData("1퍼센트의 가능성, 그것이 나의 길이다.", "나폴레옹",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-    WiseSayingData("고통이 남기고 간 뒤를 보라! 고난이 지나면 반드시 기쁨이 스며든다. ", "괴테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-)
+//val contentsList = listOf(
+//    WiseSayingData("하루에 3시간을 걸으면 7년 후에 지구를 한바퀴 돌 수 있다.", "사무엘존슨",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//    WiseSayingData("When you believe in a thing, believe in it all the way, implicitly and unquestionable.", "Walt Disney",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//    WiseSayingData("Never say goodbye because goodbye means going away and going away means forgetting", "Peter Pan",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//    WiseSayingData("Some people are worth melting for.", "Frozen(Olaf)",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//    WiseSayingData("좋은 성과를 얻으려면 한 걸음 한 걸음이 힘차고 충실하지 않으면 안 된다, ", "단테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//    WiseSayingData("1퍼센트의 가능성, 그것이 나의 길이다.", "나폴레옹",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//    WiseSayingData("고통이 남기고 간 뒤를 보라! 고난이 지나면 반드시 기쁨이 스며든다. ", "괴테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
+//)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltViewModel(),
                wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
@@ -80,7 +81,7 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
         ) {
             Log.d("WiseSaying", " WiseSaying home screen 2 " + wiseSayings.size)
             if (wiseSayings.isNotEmpty()) {
-                SwipeableCardView(wiseSayings)
+                SwipeableCardView(wiseSayings, wiseSayingViewModel)
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -93,22 +94,9 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
     }
 }
 
-@Composable
-fun DisplayContents(){
-    LazyColumn(modifier= Modifier
-        .fillMaxHeight()
-        .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(contentsList) {
-            content -> WiseSayingDataItem(wiseSayingData = content)
-        }
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SwipeableCardView(items: List<WiseSaying>) {
+fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingViewModel) {
     val pagerState = rememberPagerState(pageCount = { items.size } )
     var cardItems by remember { mutableStateOf(items) }
 
@@ -144,7 +132,8 @@ fun SwipeableCardView(items: List<WiseSaying>) {
                                 onTap = {
                                     cardItems = cardItems.mapIndexed { index, cardItem ->
                                         if (index == page) {
-                                            cardItem.copy(isFlipped)
+                                            cardItem
+//                                            cardItem.copy(isFlipped)
                                         } else {
                                             cardItem
                                         }
@@ -174,21 +163,24 @@ fun SwipeableCardView(items: List<WiseSaying>) {
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.End,
                                 ) {
-//                                IconButton(onClick = {
-//                                    cardItems = cardItems.mapIndexed { index, cardItem ->
-//                                        if (index == page) {
-//                                            cardItem.copy(isFavorite = !cardItem.isFavorite)
-//                                        } else {
-//                                            cardItem
-//                                        }
-//                                    }
-//                                }) {
-//                                    Icon(
-//                                        imageVector = Icons.Filled.Favorite,
-//                                        contentDescription = "Favorite",
-//                                        tint = if (item.isFavorite) Color.Red else Color.Gray
-//                                    )
-//                                }
+                                IconButton(onClick = {
+                                    cardItems = cardItems.mapIndexed { index, cardItem ->
+                                        if (index == page) {
+                                            val updateItem = cardItem.copy(isFavorite = (if (cardItem.isFavorite == 1) 0 else 1))
+                                            wiseSayingViewModel.updateIsFavorite(updateItem.uid)
+                                            updateItem
+
+                                        } else {
+                                            cardItem
+                                        }
+                                    }
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Favorite,
+                                        contentDescription = "Favorite",
+                                        tint = if (item.isFavorite == 1) Color.Red else Color.Gray,
+                                    )
+                                }
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Column(

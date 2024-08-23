@@ -16,17 +16,20 @@ import javax.inject.Inject
 class WiseSayingDataRepository @Inject constructor(application: Application) {
     private val db: WiseSayingDatabase = WiseSayingDatabase.getDatabase(application)
     private val wiseDao = db.wiseSayingDao()
-
-    suspend fun observeWiseSaying(): Flow<List<WiseSaying>> {
-        Log.d("WiseSayingDataRepository", wiseDao.wiseSayingList().count().toString())
-        return wiseDao.wiseSayingList()
-    }
-
     suspend fun getAll() : List<WiseSaying> {
         Log.d("wiseSayingData", wiseDao.getAll().size.toString())
         return withContext(Dispatchers.IO) {
             wiseDao.getAll()
         }
 //        return wiseDao.getAll()
+    }
+
+    suspend fun updateIsFavorite(wiseSaying: WiseSaying) {
+        Log.d(TAG, " Current updateIsFavorite value is=" + wiseSaying.isFavorite)
+        return wiseDao.updateIsFavorite(wiseSaying)
+    }
+
+    companion object {
+        const val TAG = "WiseSyaingDataRepository"
     }
 }
