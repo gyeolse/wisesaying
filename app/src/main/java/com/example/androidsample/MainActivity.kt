@@ -18,8 +18,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         setContent {
-            BottomNavigationBar()
             AndroidSampleTheme {
+                BottomNavigationBar()
 //                Surface(
 //                    modifier = Modifier.fillMaxSize(),
 //                    color = MaterialTheme.colorScheme.background
