@@ -8,20 +8,14 @@ import androidx.room.PrimaryKey
 data class WiseSaying(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "uid")
-    var uid: Int = 0, // Int는 기본적으로 notNull입니다.
+    var uid: Int = 0, // Int는 기본적으로 notNull
 
-    @ColumnInfo(name = "contents")
-    val contents: String? = null, // nullable 필드
+    @ColumnInfo(name = "contents") val contents: String, // Not null
 
-    @ColumnInfo(name = "author")
-    val author: String? = null, // nullable 필드
+    @ColumnInfo(name = "author") val author: String, // Not null
 
-    @ColumnInfo(name = "isFavorite", defaultValue = "0")
-    val isFavorite: Int = 0 // 기본값이 0인 notNull 필드
-
-//    @PrimaryKey(autoGenerate = true) var uid: Int?= null,
-//    @ColumnInfo(name = "contents") val contents: String? = null,
-//    @ColumnInfo(name = "author") val author: String? = null,
-//    @ColumnInfo(name = "isFavorite") val isFavorite: Int? = null,
+    @ColumnInfo(name = "isFavoriteAddDate") val isFavoriteAddDate: String?,
+    @ColumnInfo(name = "wisesayingTheme") val wisesayingTheme: Int?,
+    @ColumnInfo(name = "isFavorite") val isFavorite: Int? = 0   // 기본값 0
 )
 
