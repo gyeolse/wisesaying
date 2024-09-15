@@ -24,6 +24,13 @@ class WiseSayingDataRepository @Inject constructor(application: Application) {
 //        return wiseDao.getAll()
     }
 
+    suspend fun getFavoriteList(): List<WiseSaying> {
+        Log.d(TAG, wiseDao.getFavoriteList().size.toString())
+        return withContext(Dispatchers.IO) {
+            wiseDao.getFavoriteList()
+        }
+    }
+
     suspend fun updateIsFavorite(wiseSaying: WiseSaying) {
         Log.d(TAG, " Current updateIsFavorite value is=" + wiseSaying.isFavorite)
         return wiseDao.updateIsFavorite(wiseSaying)

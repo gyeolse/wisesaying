@@ -14,7 +14,7 @@ data class WiseSaying(
 
     @ColumnInfo(name = "author") val author: String, // Not null
 
-    @ColumnInfo(name = "isFavoriteAddDate") val isFavoriteAddDate: String?,
+    @ColumnInfo(name = "isFavoriteAddDate") var isFavoriteAddDate: String?,
     @ColumnInfo(name = "wisesayingTheme") val wisesayingTheme: Int?,
     @ColumnInfo(name = "isFavorite") val isFavorite: Int? = 0   // 기본값 0
 )

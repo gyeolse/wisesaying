@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -108,9 +109,13 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
     var cardItems by remember { mutableStateOf(items) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.observeAsState(emptyList())
 
     var isSnackbarShown by remember { mutableStateOf(false) }
 
+    LaunchedEffect(favoriteWiseSayings) {
+        Log.d("HomeScreen", "State changed - favoriteWiseSayings.size=${favoriteWiseSayings.size}")
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState)}

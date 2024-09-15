@@ -17,4 +17,7 @@ interface WiseSayingDao {
 
     @Update
     suspend fun updateIsFavorite(wiseSaying: WiseSaying)
+
+    @Query("SELECT * FROM wisesaying WHERE isFavorite == 1")
+    suspend fun getFavoriteList() : List<WiseSaying>
 }
