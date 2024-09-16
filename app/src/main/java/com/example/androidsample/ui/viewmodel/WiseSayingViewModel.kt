@@ -4,7 +4,9 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.androidsample.data.model.WiseSaying
 import com.example.androidsample.domain.repository.WiseSayingDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -37,6 +40,9 @@ class WiseSayingViewModel @Inject constructor(
 
     private val _favoriteWiseSayings = MutableLiveData<List<WiseSaying>>(emptyList())
     val favoriteWiseSayings: LiveData<List<WiseSaying>> get() = _favoriteWiseSayings
+
+    var searchResults by mutableStateOf(listOf<WiseSaying>())
+        private set
 
     init {
         // viewModel 초기화 시 데이터를 로드
@@ -75,6 +81,15 @@ class WiseSayingViewModel @Inject constructor(
                 fetchFavoriteWiseSayings()
                 fetchWiseSayings()
             }
+        }
+    }
+
+    fun searchWiseSayings(query: String) {
+        viewModelScope.launch {
+            wiseSayingDataRepository.searchWiseSayings(query)
+                .collect { results ->
+                    searchResults = results
+                }
         }
     }
 

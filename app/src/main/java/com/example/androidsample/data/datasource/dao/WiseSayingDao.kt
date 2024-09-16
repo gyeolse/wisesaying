@@ -20,4 +20,7 @@ interface WiseSayingDao {
 
     @Query("SELECT * FROM wisesaying WHERE isFavorite == 1")
     suspend fun getFavoriteList() : List<WiseSaying>
+
+    @Query("SELECT * FROM wisesaying WHERE contents LIKE :query OR author LIKE :query")
+    fun searchWiseSayings(query: String): Flow<List<WiseSaying>>
 }

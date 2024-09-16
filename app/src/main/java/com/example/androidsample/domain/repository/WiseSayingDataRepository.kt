@@ -36,6 +36,10 @@ class WiseSayingDataRepository @Inject constructor(application: Application) {
         return wiseDao.updateIsFavorite(wiseSaying)
     }
 
+    fun searchWiseSayings(query: String): Flow<List<WiseSaying>> {
+        return wiseDao.searchWiseSayings("%$query%")
+    }
+
     companion object {
         const val TAG = "WiseSyaingDataRepository"
     }

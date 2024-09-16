@@ -1,5 +1,6 @@
 package com.example.androidsample.ui.navigation
 
+import SearchScreen
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
@@ -77,7 +78,7 @@ fun BottomNavigationBar() {
                 HomeScreen(navController)
             }
             composable(ScreenInfo.Todo.route) {
-                TodoScreen(navController)
+                SearchScreen(navController)
             }
             composable(ScreenInfo.Favorite.route) {
                 FavoriteScreen(navController)
