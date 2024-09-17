@@ -3,6 +3,9 @@ package com.example.androidsample.ui.navigation
 import SearchScreen
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -17,10 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.androidsample.ui.screens.FavoriteScreen
 import com.example.androidsample.ui.screens.HomeScreen
 import com.example.androidsample.ui.screens.ProfileScreen
@@ -28,6 +33,7 @@ import com.example.androidsample.ui.screens.SettingScreen
 import com.example.androidsample.ui.screens.TodoScreen
 import com.example.androidsample.ui.viewmodel.TodoViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun BottomNavigationBar() {
@@ -39,6 +45,7 @@ fun BottomNavigationBar() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    Log.d("Navigation", "Current destination: ${currentDestination?.route}")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -46,7 +53,12 @@ fun BottomNavigationBar() {
             NavigationBar {
                 BottomNavigationItem().bottomNavigationItems().forEachIndexed { _, navigationItem ->
                     NavigationBarItem(
-                        selected = navigationItem.route == currentDestination?.route,
+                        selected = when (navigationItem.route) {
+                            ScreenInfo.Home.route -> currentDestination?.route?.startsWith(ScreenInfo.Home.route) == true
+                            else -> navigationItem.route == currentDestination?.route
+                        },
+//                        selected = navigationItem.route == navController.currentBackStackEntryAsState().value?.destination?.route,
+//                        selected = navigationItem.route == currentDestination?.route,
                         label = {
                             Text(navigationItem.label)
                         },
@@ -74,8 +86,10 @@ fun BottomNavigationBar() {
             navController = navController,
             startDestination = ScreenInfo.Home.route,
             modifier = Modifier.padding(paddingValues = paddingValues)) {
-            composable(ScreenInfo.Home.route) {
-                HomeScreen(navController)
+            composable(ScreenInfo.Home.route) { HomeScreen(navController) }
+            composable("${ScreenInfo.Home.route}/{uid}", arguments = listOf(navArgument("uid") { type = NavType.IntType })) { backStackEntry ->
+                val uid = backStackEntry.arguments?.getInt("uid")
+                HomeScreen(navController, selectedUid = uid)
             }
             composable(ScreenInfo.Todo.route) {
                 SearchScreen(navController)

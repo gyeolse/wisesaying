@@ -1,6 +1,8 @@
 package com.example.androidsample.ui.screens
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -75,9 +77,11 @@ import java.util.Calendar
 //    WiseSayingData("1퍼센트의 가능성, 그것이 나의 길이다.", "나폴레옹",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
 //    WiseSayingData("고통이 남기고 간 뒤를 보라! 고난이 지나면 반드시 기쁨이 스며든다. ", "괴테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
 //)
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltViewModel(),
-               wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
+               wiseSayingViewModel: WiseSayingViewModel = hiltViewModel(), selectedUid: Int? = null) {
 
     val context = SampleApplication.appContext
     val wiseSayings by wiseSayingViewModel.wiseSayings
@@ -89,7 +93,17 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
         ) {
             Log.d("WiseSaying", " WiseSaying home screen 2 " + wiseSayings.size)
             if (wiseSayings.isNotEmpty()) {
-                SwipeableCardView(wiseSayings, wiseSayingViewModel)
+                SwipeableCardView(wiseSayings, wiseSayingViewModel, selectedUid)
+
+//                if (selectedUid != null) {
+//                } else {
+//                    if (!hasRandomPageBeenSet) {
+//                        Log.d("WiseSaying", "selectedUID is null!")
+//                        val randomIndex = (wiseSayings.indices).random()
+//                        SwipeableCardView(wiseSayings, wiseSayingViewModel, randomIndex)
+//                        hasRandomPageBeenSet = true
+//                    }
+//                }
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -102,9 +116,10 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingViewModel) {
+fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingViewModel, selectedUid: Int?) {
     val pagerState = rememberPagerState(pageCount = { items.size } )
     var cardItems by remember { mutableStateOf(items) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -112,9 +127,22 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
     val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.observeAsState(emptyList())
 
     var isSnackbarShown by remember { mutableStateOf(false) }
+    var hasRandomPageBeenSet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(favoriteWiseSayings) {
-        Log.d("HomeScreen", "State changed - favoriteWiseSayings.size=${favoriteWiseSayings.size}")
+    // 선택된 uid에 따라 해당 페이지로 스크롤
+    LaunchedEffect(items, selectedUid) {
+        if (selectedUid != null) {
+            val selectedIndex = items.indexOfFirst { it.uid == selectedUid }
+            if (selectedIndex >= 0) {
+                pagerState.scrollToPage(selectedIndex)
+            }
+        } else {
+            if (!hasRandomPageBeenSet) {
+                val randomIndex = (items.indices).random()
+                pagerState.scrollToPage(randomIndex)
+                hasRandomPageBeenSet = true
+            }
+        }
     }
 
     Scaffold(
@@ -122,7 +150,9 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
     ) {
         innerPadding ->
         VerticalPager(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             state = pagerState
         ) {page ->
             val item = cardItems[page]

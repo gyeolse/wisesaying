@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.androidsample.data.model.WiseSaying
+import com.example.androidsample.ui.navigation.ScreenInfo
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 
@@ -35,13 +37,13 @@ fun SearchScreen(navController: NavController,
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            AutoCompleteWiseSaying(wiseSayingViewModel)
+            AutoCompleteWiseSaying(wiseSayingViewModel, navController)
         }
     }
 }
 
 @Composable
-fun AutoCompleteWiseSaying(viewModel: WiseSayingViewModel) {
+fun AutoCompleteWiseSaying(viewModel: WiseSayingViewModel, navController: NavController) {
     var text by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
@@ -73,7 +75,16 @@ fun AutoCompleteWiseSaying(viewModel: WiseSayingViewModel) {
                             .fillMaxWidth()
                             .clickable {
                                 text = wiseSaying.contents
-                                onItemClick(wiseSaying)
+                                navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
+                                    Log.d("Navigation", "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}")
+
+                                    // SearchScreen의 상태를 유지하지 않고 popUpTo를 HomeScreen으로 변경
+                                    popUpTo(ScreenInfo.Home.route) {
+                                        inclusive = true // HomeScreen이 이미 있을 경우 중복 방지
+                                        saveState = false // 새로운 화면으로 이동 시 상태 저장 불필요
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true                                }
                                 expanded = false
                             }
                             .padding(8.dp)
@@ -114,9 +125,4 @@ fun HighlightedText(fullText: String, searchText: String) {
     }
 
     Text(text = annotatedString)
-}
-
-
-fun onItemClick(wiseSaying: WiseSaying) {
-    TODO("Not yet implemented")
 }

@@ -21,7 +21,8 @@ data class BottomNavigationItem(
             BottomNavigationItem(
                 label = "Home",
                 icon = Icons.Filled.Home,
-                route = ScreenInfo.Home.route
+                route = ScreenInfo.Home.route,
+
             ),
             BottomNavigationItem(
                 label = "Search",
