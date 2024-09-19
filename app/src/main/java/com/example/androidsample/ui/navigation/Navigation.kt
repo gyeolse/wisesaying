@@ -5,6 +5,7 @@ sealed class ScreenInfo(val route: String) {
     object Profile: ScreenInfo("profile_screen")
     object Settings: ScreenInfo("setting_screen")
     object Todo: ScreenInfo("todo_screen")
+    object Search: ScreenInfo("search_screen")
 
     object Favorite: ScreenInfo("favorite_screen")
 }

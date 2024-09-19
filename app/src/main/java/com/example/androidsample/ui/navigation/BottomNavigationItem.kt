@@ -27,7 +27,7 @@ data class BottomNavigationItem(
             BottomNavigationItem(
                 label = "Search",
                 icon = Icons.Rounded.Search,
-                route = ScreenInfo.Todo.route
+                route = ScreenInfo.Search.route
             ),
             BottomNavigationItem(
                 label = "Favorite",

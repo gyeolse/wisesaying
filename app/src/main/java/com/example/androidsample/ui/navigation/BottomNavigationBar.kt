@@ -91,7 +91,7 @@ fun BottomNavigationBar() {
                 val uid = backStackEntry.arguments?.getInt("uid")
                 HomeScreen(navController, selectedUid = uid)
             }
-            composable(ScreenInfo.Todo.route) {
+            composable(ScreenInfo.Search.route) {
                 SearchScreen(navController)
             }
             composable(ScreenInfo.Favorite.route) {
