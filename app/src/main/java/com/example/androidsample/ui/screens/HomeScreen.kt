@@ -1,7 +1,13 @@
 package com.example.androidsample.ui.screens
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -25,6 +31,7 @@ import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,13 +56,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType.Companion.Uri
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.androidsample.SampleApplication
@@ -66,17 +77,16 @@ import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.TodoViewModel
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import android.net.Uri
+import android.os.Environment
+import android.os.Environment.*
+import android.view.ViewGroup
+import androidx.compose.foundation.text.BasicText
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
+import android.graphics.Canvas
 
-//val contentsList = listOf(
-//    WiseSayingData("하루에 3시간을 걸으면 7년 후에 지구를 한바퀴 돌 수 있다.", "사무엘존슨",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//    WiseSayingData("When you believe in a thing, believe in it all the way, implicitly and unquestionable.", "Walt Disney",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//    WiseSayingData("Never say goodbye because goodbye means going away and going away means forgetting", "Peter Pan",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//    WiseSayingData("Some people are worth melting for.", "Frozen(Olaf)",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//    WiseSayingData("좋은 성과를 얻으려면 한 걸음 한 걸음이 힘차고 충실하지 않으면 안 된다, ", "단테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//    WiseSayingData("1퍼센트의 가능성, 그것이 나의 길이다.", "나폴레옹",  isFavorite = true, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//    WiseSayingData("고통이 남기고 간 뒤를 보라! 고난이 지나면 반드시 기쁨이 스며든다. ", "괴테",  isFavorite = false, isFavoriteAddDate = Calendar.getInstance().timeInMillis, wiseSayingDataThemes = "default"),
-//)
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -91,19 +101,8 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            Log.d("WiseSaying", " WiseSaying home screen 2 " + wiseSayings.size)
             if (wiseSayings.isNotEmpty()) {
-                SwipeableCardView(wiseSayings, wiseSayingViewModel, selectedUid)
-
-//                if (selectedUid != null) {
-//                } else {
-//                    if (!hasRandomPageBeenSet) {
-//                        Log.d("WiseSaying", "selectedUID is null!")
-//                        val randomIndex = (wiseSayings.indices).random()
-//                        SwipeableCardView(wiseSayings, wiseSayingViewModel, randomIndex)
-//                        hasRandomPageBeenSet = true
-//                    }
-//                }
+                SwipeableCardView(wiseSayings, wiseSayingViewModel, selectedUid, context)
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -119,14 +118,11 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingViewModel, selectedUid: Int?) {
+fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingViewModel, selectedUid: Int?, context: Context) {
     val pagerState = rememberPagerState(pageCount = { items.size } )
     var cardItems by remember { mutableStateOf(items) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.observeAsState(emptyList())
-
-    var isSnackbarShown by remember { mutableStateOf(false) }
     var hasRandomPageBeenSet by remember { mutableStateOf(false) }
 
     // 선택된 uid에 따라 해당 페이지로 스크롤
@@ -156,15 +152,6 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
             state = pagerState
         ) {page ->
             val item = cardItems[page]
-            val isFlipped = false
-
-            val rotationYs by animateFloatAsState(
-                targetValue = if (isFlipped) 180f else 0f,
-                animationSpec = tween(durationMillis = 600), label = ""
-            )
-
-            val frontVisibility = if (rotationYs <= 90f) 1f else 0f
-            val backVisibility = if (rotationYs > 90f) 1f else 0f
 
             Box(
                 modifier = Modifier
@@ -173,7 +160,6 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,7 +170,6 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                                     cardItems = cardItems.mapIndexed { index, cardItem ->
                                         if (index == page) {
                                             cardItem
-//                                            cardItem.copy(isFlipped)
                                         } else {
                                             cardItem
                                         }
@@ -192,130 +177,104 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                                 }
                             )
                         }
-                        .graphicsLayer {
-                            rotationY = rotationYs
-                            cameraDistance = 12f * density
-                        }
                 ) {
-                    if (frontVisibility == 1f) {
-                        Card(
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(400.dp)
+                    ) {
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(400.dp)
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End,
-                                ) {
-                                    IconButton(onClick = {
-                                        cardItems = cardItems.mapIndexed { index, cardItem ->
-                                            if (index == page) {
-                                                scope.launch {
-                                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                IconButton(onClick = {
+                                    cardItems = cardItems.mapIndexed { index, cardItem ->
+                                        if (index == page) {
+                                            scope.launch {
+                                                snackbarHostState.currentSnackbarData?.dismiss()
 
-                                                    if (cardItem.isFavorite == 1) {
-                                                        snackbarHostState.showSnackbar(message = "즐겨찾기에 삭제되었습니다.", duration = SnackbarDuration.Short)
-                                                    } else {
-                                                        snackbarHostState.showSnackbar(message = "즐겨찾기에 추가되었습니다.", duration = SnackbarDuration.Short)
-                                                    }
+                                                if (cardItem.isFavorite == 1) {
+                                                    snackbarHostState.showSnackbar(message = "즐겨찾기에 삭제되었습니다.", duration = SnackbarDuration.Short)
+                                                } else {
+                                                    snackbarHostState.showSnackbar(message = "즐겨찾기에 추가되었습니다.", duration = SnackbarDuration.Short)
                                                 }
-                                                val updateItem = cardItem.copy(isFavorite = (if (cardItem.isFavorite == 1) 0 else 1))
-                                                wiseSayingViewModel.updateIsFavorite(updateItem.uid)
-                                                updateItem
-                                            } else {
-                                                cardItem
                                             }
+                                            val updateItem = cardItem.copy(isFavorite = (if (cardItem.isFavorite == 1) 0 else 1))
+                                            wiseSayingViewModel.updateIsFavorite(updateItem.uid)
+                                            updateItem
+                                        } else {
+                                            cardItem
                                         }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Favorite,
-                                            contentDescription = "Favorite",
-                                            tint = if (item.isFavorite == 1) Color.Red else Color.Gray,
-                                        )
                                     }
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Favorite,
+                                        contentDescription = "Favorite",
+                                        tint = if (item.isFavorite == 1) Color.Red else Color.Gray,
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    item.contents?.let {
-                                        Text(text = it,
-                                            overflow = TextOverflow.Ellipsis,
-                                            fontSize = 30.sp,
-                                            textAlign = TextAlign.Center,
-                                            fontStyle = FontStyle.Normal,
-                                            lineHeight = 30.sp,
-                                            color = Color.Black)
-                                    }
-                                    item.author?.let {
-                                        Text(text = it,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 16.sp,
-                                            textAlign = TextAlign.Center,
-                                            fontStyle = FontStyle.Italic,
-                                            modifier = Modifier.padding(10.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
 
-                    if (backVisibility == 1f) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(400.dp)
-                        ) {
+                                ShareButton(shareText = "${item.contents} - ${item.author ?: "Unknown"}")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
                             Column(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
+                                    .fillMaxSize(),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    item.author?.let {
-                                        Text(text = it,
-                                            modifier = Modifier.graphicsLayer {
-                                                alpha = backVisibility
-                                                rotationY = rotationYs
-                                            },
-                                            overflow = TextOverflow.Ellipsis,
-                                            fontSize = 30.sp,
-                                            textAlign = TextAlign.Center,
-                                            fontStyle = FontStyle.Normal,
-                                            lineHeight = 30.sp,
-                                            color = Color.Black)
-                                    }
+                                item.contents?.let {
+                                    Text(text = it,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontSize = 30.sp,
+                                        textAlign = TextAlign.Center,
+                                        fontStyle = FontStyle.Normal,
+                                        lineHeight = 30.sp,
+                                        color = Color.Black)
+                                }
+                                item.author?.let {
+                                    Text(text = it,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        textAlign = TextAlign.Center,
+                                        fontStyle = FontStyle.Italic,
+                                        modifier = Modifier.padding(10.dp))
                                 }
                             }
                         }
                     }
                 }
-
             }
         }
-
     }
 }
 
-@Preview
 @Composable
-fun TestHomeScreen() {
-//   SwipeableCardView(contentsList)
+fun ShareButton(shareText: String) {
+    val context = LocalContext.current
+
+    IconButton(onClick = {
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)  // 플래그 추가
+        }
+
+        val chooser = Intent.createChooser(shareIntent, "명언 공유하기")
+        context.startActivity(chooser)
+    }) {
+        Icon(
+            imageVector = Icons.Filled.Share,
+            contentDescription = "Share",
+            tint = Color.Blue
+        )
+    }
 }
