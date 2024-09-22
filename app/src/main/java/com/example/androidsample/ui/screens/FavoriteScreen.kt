@@ -1,6 +1,7 @@
 package com.example.androidsample.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.androidsample.data.model.WiseSaying
+import com.example.androidsample.ui.navigation.ScreenInfo
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 import java.time.LocalDate
@@ -32,7 +34,6 @@ import java.time.LocalDate
 @Composable
 fun FavoriteScreen(navController: NavController,
                    wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
-//    val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.collectAsState(emptyList())
     val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.observeAsState(emptyList())
 
     // 로그를 통해 상태 변화 감지
@@ -53,53 +54,33 @@ fun FavoriteScreen(navController: NavController,
             items(favoriteWiseSayings) { wiseSaying ->
                 QuoteItem(
                     wiseSaying = wiseSaying,
+                    onClick = {
+                        navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
+                            Log.d("Navigation", "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}")
+
+                            popUpTo(ScreenInfo.Home.route) {
+                                inclusive = true // HomeScreen이 이미 있을 경우 중복 방지
+                                saveState = false // 새로운 화면으로 이동 시 상태 저장 불필요
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
-//        item {
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-////            Button(
-////                onClick = {
-////                    navController.navigate("home_screen")
-////                },
-////                modifier = Modifier.align(Alignment.CenterHorizontally)
-////            ) {
-////                Text("즐겨찾기 추가하기")
-////            }
-//        }
         }
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .verticalScroll(scrollState)
-//            .padding(16.dp)
-//    ) {
-//        favoriteWiseSayings.forEach { wiseSaying ->
-//            QuoteItem(wiseSaying)
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        // "즐겨찾기 추가하기" 버튼
-//        Button(
-//            onClick = {
-//                // 홈 화면으로 이동 (HomeScreen.kt으로)
-//                navController.navigate("home_screen")
-//            },
-//            modifier = Modifier.align(Alignment.CenterHorizontally)
-//        ) {
-//            Text("즐겨찾기 추가하기")
-//        }
-//    }
     }
-}
-@Composable
-fun FavoriteQuotesScreen(navController: NavController, wiseSayingViewModel: WiseSayingViewModel) {
 }
 
 @Composable
-fun QuoteItem(wiseSaying: WiseSaying) {
-    Column(modifier = Modifier.padding(8.dp)) {
+fun QuoteItem(
+    wiseSaying: WiseSaying,
+    onClick: () -> Unit ) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onClick() }
+    ) {
         Text(
             text = wiseSaying.contents,
             style = MaterialTheme.typography.bodyLarge,
