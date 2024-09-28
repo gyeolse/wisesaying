@@ -118,6 +118,36 @@ class WiseSayingViewModel @Inject constructor(
         }
     }
 
+    fun saveThemePreference(isDarkMode: Boolean) {
+        Log.d(TAG, "saveThemePreference Called isDarkMode=${isDarkMode}")
+        viewModelScope.launch {
+            wiseSayingDataRepository.saveThemePreference(isDarkMode)
+        }
+    }
+
+    fun getThemePreference(): Flow<Boolean> {
+        Log.d(TAG, "getThemePreference Called")
+//        viewModelScope.launch {
+//            wiseSayingDataRepository.getThemePreference().collect { isDarkMode ->
+//                Log.d(TAG, "Current theme preference: $isDarkMode")
+//                // 예: _isDarkModeState.value = isDarkMode
+//            }
+//        }
+        return wiseSayingDataRepository.getThemePreference()
+
+    }
+
+    fun savePushNotificationPreference(isEnabled: Boolean) {
+        Log.d(TAG, "savePushNotificationPreference Called isEnabled=${isEnabled}")
+        viewModelScope.launch {
+            wiseSayingDataRepository.savePushNotificationPreference(isEnabled)
+        }
+    }
+
+    fun getPushNotificationPreference(): Flow<Boolean> {
+        Log.d(TAG, "getPushNotificationPreference Called")
+        return wiseSayingDataRepository.getPushNotificationPreference()
+    }
     companion object {
         const val TAG =  "WiseSayingViewModel"
     }

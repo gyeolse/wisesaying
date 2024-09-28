@@ -1,5 +1,7 @@
 package com.example.androidsample.ui.screens
 
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -27,6 +29,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,32 +47,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.androidsample.ui.theme.AndroidSampleTheme
+import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 
 @Composable
-fun SettingScreen(navController: NavController) {
+fun SettingScreen(
+    navController: NavController,
+    wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
     AndroidSampleTheme {
-        SampleApp()
-//        MyApp()
-//        Surface(
-//            modifier = Modifier.fillMaxSize(),
-//            color = MaterialTheme.colorScheme.background
-//        ) {
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(15.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.Center
-//            ) {
-//                Text(
-//                    "SettingScreen",
-//                    style = MaterialTheme.typography.titleLarge,
-//                    modifier = Modifier.padding(vertical = 20.dp)
-//                )
-//            }
-//        }
+        SampleApp(wiseSayingViewModel)
     }
 }
 
@@ -143,9 +132,10 @@ fun MyApp() {
 }
 
 @Composable
-fun SampleApp() {
+fun SampleApp(wiseSayingViewModel: WiseSayingViewModel) {
     val context = LocalContext.current
-    var isPushNotificationsEnabled by remember { mutableStateOf(true) }
+    val isDarkThemeEnabled by wiseSayingViewModel.getThemePreference().collectAsState(initial = false)
+    val isPushNotificationEnabled by wiseSayingViewModel.getPushNotificationPreference().collectAsState(initial = false)
 
     Column(
         modifier = Modifier
@@ -164,12 +154,30 @@ fun SampleApp() {
                 Text(text = "매일 9:00 AM에 습관 알림해드려요!", fontSize = 14.sp, color = Color.Gray)
             }
             Switch(
-                checked = isPushNotificationsEnabled,
-                onCheckedChange = { isPushNotificationsEnabled = it },
+                checked = isPushNotificationEnabled,
+                onCheckedChange = { isChecked ->
+                    wiseSayingViewModel.savePushNotificationPreference(isChecked)
+                },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color(0xFF2196F3),
                     uncheckedThumbColor = Color(0xFFB0BEC5)
                 )
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "다크 테마 활성화",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = isDarkThemeEnabled,
+                onCheckedChange = { isChecked ->
+                    wiseSayingViewModel.saveThemePreference(isChecked)
+                }
             )
         }
 
@@ -181,27 +189,18 @@ fun SampleApp() {
         ButtonWithIcon(
             text = "별점 주기",
             icon = Icons.Default.Star,
-            onClick = { /* Handle Rating click */ }
+            onClick = { openPlayStore(context) }
         )
         ButtonWithIcon(
             text = "문의 메일 보내기",
             icon = Icons.Default.Email,
             onClick = {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:example@example.com")
+                    data = Uri.parse("mailto:threewave@kakao.com")
                 }
                 context.startActivity(intent)
             }
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Push 알림", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            Switch(
-                checked = isPushNotificationsEnabled,
-                onCheckedChange = { isChecked -> isPushNotificationsEnabled = isChecked }
-            )
-        }
     }
 }
 
@@ -230,4 +229,18 @@ fun ButtonWithIcon(text: String, icon: ImageVector, onClick: () -> Unit) {
         }
     }
 
+}
+
+fun openPlayStore(context: Context) {
+    val appPackageName = context.packageName // 현재 앱의 패키지 이름
+    try {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName"))
+        )
+    } catch (e: ActivityNotFoundException) {
+        // Play Store가 설치되어 있지 않은 경우 웹 브라우저로 이동
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName"))
+        )
+    }
 }

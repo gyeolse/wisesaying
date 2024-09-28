@@ -2,26 +2,23 @@ package com.example.androidsample.domain.repository
 
 import android.app.Application
 import android.util.Log
-import androidx.room.Room
-import com.example.androidsample.data.datasource.database.TodoDatabase
 import com.example.androidsample.data.datasource.database.WiseSayingDatabase
-import com.example.androidsample.data.model.Todo
+import WiseSayingDataStore
 import com.example.androidsample.data.model.WiseSaying
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class WiseSayingDataRepository @Inject constructor(application: Application) {
     private val db: WiseSayingDatabase = WiseSayingDatabase.getDatabase(application)
     private val wiseDao = db.wiseSayingDao()
+    private val wiseSayingDataStore = WiseSayingDataStore(application)
     suspend fun getAll() : List<WiseSaying> {
         Log.d("wiseSayingData", wiseDao.getAll().size.toString())
         return withContext(Dispatchers.IO) {
             wiseDao.getAll()
         }
-//        return wiseDao.getAll()
     }
 
     suspend fun getFavoriteList(): List<WiseSaying> {
@@ -38,6 +35,26 @@ class WiseSayingDataRepository @Inject constructor(application: Application) {
 
     fun searchWiseSayings(query: String): Flow<List<WiseSaying>> {
         return wiseDao.searchWiseSayings("%$query%")
+    }
+
+    // 추가: 테마 설정 저장
+    suspend fun saveThemePreference(isDarkMode: Boolean) {
+        wiseSayingDataStore.saveThemePreference(isDarkMode)
+    }
+
+    // 추가: 테마 설정 불러오기
+    fun getThemePreference(): Flow<Boolean> {
+        return wiseSayingDataStore.getThemePreference()
+    }
+
+    // 추가: Push 알림 설정 저장
+    suspend fun savePushNotificationPreference(isEnabled: Boolean) {
+        wiseSayingDataStore.savePushNotificationPreference(isEnabled)
+    }
+
+    // 추가: Push 알림 설정 불러오기
+    fun getPushNotificationPreference(): Flow<Boolean> {
+        return wiseSayingDataStore.getPushNotificationPreference()
     }
 
     companion object {

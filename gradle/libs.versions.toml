@@ -1,6 +1,7 @@
 [versions]
 agp = "8.3.0"
 coreSplashscreen = "1.0.1"
+datastorePreferences = "1.1.1"
 foundation = "1.6.8"
 hiltAndroid = "2.49"
 hiltAndroidGradlePlugin = "2.44"
@@ -26,6 +27,7 @@ runtimeLivedata = "1.7.1"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-lifecycle-viewmodel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version.ref = "hiltLifecycleViewmodel" }
