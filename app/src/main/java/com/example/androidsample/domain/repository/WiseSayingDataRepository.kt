@@ -5,15 +5,19 @@ import android.util.Log
 import com.example.androidsample.data.datasource.database.WiseSayingDatabase
 import WiseSayingDataStore
 import com.example.androidsample.data.model.WiseSaying
+import com.example.androidsample.receiver.AlarmScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class WiseSayingDataRepository @Inject constructor(application: Application) {
+class WiseSayingDataRepository @Inject constructor(
+    application: Application) {
     private val db: WiseSayingDatabase = WiseSayingDatabase.getDatabase(application)
     private val wiseDao = db.wiseSayingDao()
     private val wiseSayingDataStore = WiseSayingDataStore(application)
+    private val alarmScheduler = AlarmScheduler(application)
+
     suspend fun getAll() : List<WiseSaying> {
         Log.d("wiseSayingData", wiseDao.getAll().size.toString())
         return withContext(Dispatchers.IO) {
@@ -50,6 +54,11 @@ class WiseSayingDataRepository @Inject constructor(application: Application) {
     // 추가: Push 알림 설정 저장
     suspend fun savePushNotificationPreference(isEnabled: Boolean) {
         wiseSayingDataStore.savePushNotificationPreference(isEnabled)
+        if (isEnabled) {
+            alarmScheduler.scheduleDailyNotification()
+        } else {
+            alarmScheduler.cancelDailyNotification()
+        }
     }
 
     // 추가: Push 알림 설정 불러오기
