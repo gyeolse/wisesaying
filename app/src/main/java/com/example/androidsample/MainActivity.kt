@@ -2,6 +2,7 @@ package com.example.androidsample
 
 import android.content.pm.PackageManager
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -23,16 +24,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Intent에서 권한 요청 여부 확인
+        // [TODO] 앱 처음 켰을 때, 권한 설정 로직 추가
+
         val intent = intent
-        val requestPermission = intent.getBooleanExtra("request_permission", false)
-        if (requestPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                // 권한 요청
-                Log.d("MainActivity", "Need Permissions")
-                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
-            }
-        }
+        handleCurrentIntent(intent)
 
         installSplashScreen()
         setContent {
@@ -48,15 +43,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            // 권한이 승인된 경우
-            Log.d("MainActivity", "Notification permission granted")
-        } else {
-            // 권한 거부된 경우
-            Log.d("MainActivity", "Notification permission denied")
+    private fun handleCurrentIntent(intent: Intent) {
+        // Intent에서 권한 요청 여부 확인
+        val requestPermission = intent.getBooleanExtra("request_permission", false)
+
+        if (requestPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // 권한 요청
+                Log.d("MainActivity", "Need Permissions")
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
         }
     }
 }

@@ -22,22 +22,7 @@ import com.example.androidsample.MainActivity
 // 알림을 받기 위한 BroadcastReceiver 생성
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        // 알림을 생성하여 표시하는 함수 호출
         Log.d("AlarmReceiver", "onReceive")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                // 권한이 없으면 권한 요청을 Activity에서 처리하도록 Activity로 전달
-                Log.d("AlarmReceiver", "Need Permissions!")
-                val activityIntent = Intent(context, MainActivity::class.java).apply {
-                    // FLAG_ACTIVITY_NEW_TASK 플래그 추가
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    putExtra("request_permission", true)
-                }
-                context.startActivity(activityIntent)  // Activity 시작
-                return
-            }
-        }
         showNotification(context)
     }
 
