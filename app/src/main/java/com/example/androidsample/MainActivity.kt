@@ -8,18 +8,27 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.androidsample.domain.repository.WiseSayingDataRepository
+import com.example.androidsample.receiver.AlarmScheduler
 import com.example.androidsample.ui.navigation.BottomNavigationBar
 import com.example.androidsample.ui.theme.AndroidSampleTheme
+import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val wiseSayingViewModel: WiseSayingViewModel by viewModels()
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +37,8 @@ class MainActivity : ComponentActivity() {
 
         val intent = intent
         handleCurrentIntent(intent)
+
+        wiseSayingViewModel.checkAndSyncNotificationSettings()
 
         installSplashScreen()
         setContent {

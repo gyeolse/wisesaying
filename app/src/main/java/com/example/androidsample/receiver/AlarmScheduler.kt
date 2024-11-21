@@ -13,9 +13,20 @@ import android.util.Log
 import android.widget.Toast
 import java.util.Calendar
 import android.provider.Settings
+import com.example.androidsample.receiver.AlarmReceiver.Companion.NOTIFICATION_REQUEST_CODE
 
 class AlarmScheduler(private val context: Context) {
-    // 알림 예약 함수
+    fun isNotificationScheduled(): Boolean {
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE // 기존 PendingIntent가 있는지 확인
+        )
+        return pendingIntent != null
+    }
+
     @SuppressLint("ServiceCast", "ScheduleExactAlarm")
     fun scheduleDailyNotification() {
         setExactAlarm()
@@ -33,9 +44,14 @@ class AlarmScheduler(private val context: Context) {
 
         val calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 20)  // 오후 6시 설정
-            set(Calendar.MINUTE, 15)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
+
+            // 시간이 이미 지났다면 다음 날로 설정
+            if (timeInMillis <= System.currentTimeMillis()) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
         }
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

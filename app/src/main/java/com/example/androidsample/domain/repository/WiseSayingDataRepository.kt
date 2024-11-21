@@ -70,7 +70,6 @@ class WiseSayingDataRepository @Inject constructor(
                 Log.d("WiseSayingDataRepository", "Needs Permissions")
 
                 // [TODO] 수정 필요. 설정 직후, 바로 알람 설정이 가능해야함.
-                // [TODO] 추가로 주기적으로 하루마다 알림가능하도록 수정 필요.
 
                 requestPermissionsIfNeededAndNotify(isPostPushNotificationPermission, isHasAlarmPermission) {
                     alarmScheduler.scheduleDailyNotification()
@@ -112,6 +111,15 @@ class WiseSayingDataRepository @Inject constructor(
             onPermissionsGranted()
         }
     }
+
+    fun isNotificationScheduled(): Boolean {
+        return alarmScheduler.isNotificationScheduled()
+    }
+
+    fun scheduleDailyNotification() {
+        alarmScheduler.scheduleDailyNotification()
+    }
+
     companion object {
         const val TAG = "WiseSyaingDataRepository"
     }

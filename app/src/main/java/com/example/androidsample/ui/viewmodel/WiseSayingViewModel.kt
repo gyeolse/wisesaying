@@ -14,9 +14,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.androidsample.data.model.WiseSaying
 import com.example.androidsample.domain.repository.WiseSayingDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.internal.format
 import java.time.LocalDateTime
@@ -147,6 +150,19 @@ class WiseSayingViewModel @Inject constructor(
     fun getPushNotificationPreference(): Flow<Boolean> {
         Log.d(TAG, "getPushNotificationPreference Called")
         return wiseSayingDataRepository.getPushNotificationPreference()
+    }
+
+    fun checkAndSyncNotificationSettings() {
+        Log.d(TAG, "checkAndSyncNotificationSettings Called")
+        CoroutineScope(Dispatchers.Default).launch {
+            val isPushNotificationEnabled = wiseSayingDataRepository.getPushNotificationPreference().first() // DataStore에서 가져옴
+            val isNotificationScheduled = wiseSayingDataRepository.isNotificationScheduled() // 현재 알림 상태 확인
+
+            if (isPushNotificationEnabled && !isNotificationScheduled) {
+                wiseSayingDataRepository.scheduleDailyNotification()
+            }
+            Log.d(TAG, "checkAndSyncNotificationSettings Called, value is $isNotificationScheduled And $isPushNotificationEnabled")
+        }
     }
     companion object {
         const val TAG =  "WiseSayingViewModel"
