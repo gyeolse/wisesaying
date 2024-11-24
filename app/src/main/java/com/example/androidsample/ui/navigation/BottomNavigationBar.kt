@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +20,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -50,7 +53,10 @@ fun BottomNavigationBar() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = Color.White, // 네비게이션 바 배경 (필요시 변경)
+                tonalElevation = 0.dp // Elevation 제거
+            ) {
                 BottomNavigationItem().bottomNavigationItems().forEachIndexed { _, navigationItem ->
                     NavigationBarItem(
                         selected = when (navigationItem.route) {
@@ -60,12 +66,20 @@ fun BottomNavigationBar() {
 //                        selected = navigationItem.route == navController.currentBackStackEntryAsState().value?.destination?.route,
 //                        selected = navigationItem.route == currentDestination?.route,
                         label = {
-                            Text(navigationItem.label)
+                                null
+//                            Text(navigationItem.label)
                         },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.Black, // 선택된 아이콘 색상
+                            unselectedIconColor = Color.Gray, // 선택되지 않은 아이콘 색상
+                            indicatorColor = Color.White // 배경 타원 제거
+                        ),
                         icon = {
+                            // 아이콘의 색상을 `selected` 상태에 따라 동적으로 설정
                             Icon(
-                                navigationItem.icon,
-                                contentDescription = navigationItem.label
+                                imageVector = navigationItem.icon,
+                                contentDescription = navigationItem.label,
+                                tint = if (currentDestination?.route == navigationItem.route) Color.Black else Color.Gray
                             )
                         },
                         onClick = {
