@@ -86,6 +86,8 @@ import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import android.graphics.Canvas
+import androidx.compose.ui.text.font.FontFamily
+import java.lang.Exception
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
@@ -108,7 +110,7 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "로딩 중입니다...")
+                    Text(text = "로딩 중입니다...", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -133,10 +135,14 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                 pagerState.scrollToPage(selectedIndex)
             }
         } else {
-            if (!hasRandomPageBeenSet) {
-                val randomIndex = (items.indices).random()
-                pagerState.scrollToPage(randomIndex)
-                hasRandomPageBeenSet = true
+            try {
+                if (!hasRandomPageBeenSet) {
+                    val randomIndex = (items.indices).random()
+                    pagerState.scrollToPage(randomIndex)
+                    hasRandomPageBeenSet = true
+                }
+            } catch (e: Exception) {
+                Log.d("HomeScreen", "Exceptions")
             }
         }
     }
@@ -157,7 +163,7 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .background(Color.LightGray),
+                    .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -182,6 +188,10 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(400.dp)
+                            .background(Color.White), // 카드 배경을 흰색으로 설정,
+                        colors = androidx.compose.material3.CardDefaults.cardColors(
+                        containerColor = Color.White // 카드 배경을 흰색으로 명시적으로 설정
+                        )
                     ) {
                         Column(
                             modifier = Modifier
@@ -232,16 +242,20 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                             ) {
                                 item.contents?.let {
                                     Text(text = it,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.SansSerif,
                                         overflow = TextOverflow.Ellipsis,
                                         fontSize = 30.sp,
                                         textAlign = TextAlign.Center,
                                         fontStyle = FontStyle.Normal,
-                                        lineHeight = 30.sp,
+                                        lineHeight = 40.sp,
+                                        letterSpacing = 2.sp,
                                         color = Color.Black)
                                 }
                                 item.author?.let {
                                     Text(text = it,
                                         fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.SansSerif,
                                         fontSize = 16.sp,
                                         textAlign = TextAlign.Center,
                                         fontStyle = FontStyle.Italic,
