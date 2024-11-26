@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.androidsample.data.model.WiseSaying
+import com.example.androidsample.ui.component.CustomTopAppBar
 import com.example.androidsample.ui.navigation.ScreenInfo
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
@@ -62,16 +63,9 @@ fun SearchScreen(
     AndroidSampleTheme {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("명언 검색", fontSize = 18.sp, fontWeight = FontWeight.Bold,) },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "뒤로 가기"
-                            )
-                        }
-                    },
+                CustomTopAppBar(
+                    title = "설정",
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         ) { paddingValues ->
@@ -149,7 +143,7 @@ fun AutoCompleteWiseSaying(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Button(
-                    onClick = { /* 추가 기능 구현 */ },
+                    onClick = { navController.navigate(ScreenInfo.Home.route) },
                     modifier = Modifier.padding(top = 16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black, // 버튼 배경색 설정

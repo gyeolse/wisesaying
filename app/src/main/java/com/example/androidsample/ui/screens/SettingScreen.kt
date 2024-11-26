@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,13 +14,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,113 +58,85 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.androidsample.ui.component.CustomSwitch
+import com.example.androidsample.ui.component.CustomTopAppBar
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
+
+private var currentToast: Toast? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
     navController: NavController,
     wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
+
     AndroidSampleTheme {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("설정", fontSize = 18.sp, fontWeight = FontWeight.Bold,) },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "뒤로 가기"
-                            )
-                        }
-                    }
+                CustomTopAppBar(
+                    title = "설정",
+                    onBackClick = { navController.popBackStack() }
                 )
             }
-        ) { paddingValues -> // Scaffold의 패딩을 받기 위해 사용
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // 패딩을 적용
+                    .padding(paddingValues)
             ) {
-                SampleApp(wiseSayingViewModel = wiseSayingViewModel)
+                ProfileButtons(wiseSayingViewModel = wiseSayingViewModel)
+                SettingButtons(wiseSayingViewModel = wiseSayingViewModel)
             }
         }
     }
 }
 
-
-
 @Composable
-fun MyApp() {
-    var isReminderEnabled by remember { mutableStateOf(false) }
-
-    Column(
+fun ProfileButtons(wiseSayingViewModel: WiseSayingViewModel) {
+    Row(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column {
-                Text(text = "매일 명언 알림", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text(text = "매일 9:00 AM에 습관 알림해드려요!", fontSize = 14.sp, color = Color.Gray)
-            }
-            Switch(
-                checked = isReminderEnabled,
-                onCheckedChange = { isReminderEnabled = it },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color(0xFF2196F3),
-                    uncheckedThumbColor = Color(0xFFB0BEC5)
+            Box(
+                modifier = Modifier
+                    .width(64.dp)
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                // Placeholder for profile image
+                Icon(
+                    imageVector = Icons.Default.Person, // Replace with an image loader like Coil for a real image
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.DarkGray
                 )
-            )
-        }
+            }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFEDE7F6)) // Light purple background
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Setting Page",
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-        }
-
-        Button(modifier = Modifier
-            .padding(start = 20.dp, end = 20.dp)
-            .width(246.dp),
-            onClick = { /*TODO*/ }) {
-            Text(text = "공지사항", style = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            ), textAlign = TextAlign.Center)
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            ClickableText(text = AnnotatedString("공지사항"), onClick = { /* TODO */ })
-            ClickableText(text = AnnotatedString("앱 버전 1.4.6"), onClick = { /* TODO */ })
-            ClickableText(text = AnnotatedString("TEST"), onClick = { /* TODO */ })
-            ClickableText(text = AnnotatedString("별점 주기"), onClick = { /* TODO */ })
-            ClickableText(text = AnnotatedString("Instagram"), onClick = { /* TODO */ })
-            ClickableText(text = AnnotatedString("만든 사람들"), onClick = { /* TODO */ })
-            ClickableText(text = AnnotatedString("문의 메일 보내기 "), onClick = { /* TODO */ })
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "사용자님 안녕하세요!",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun SampleApp(wiseSayingViewModel: WiseSayingViewModel) {
+fun SettingButtons(wiseSayingViewModel: WiseSayingViewModel) {
     val context = LocalContext.current
     val isDarkThemeEnabled by wiseSayingViewModel.getThemePreference().collectAsState(initial = false)
     val isPushNotificationEnabled by wiseSayingViewModel.getPushNotificationPreference().collectAsState(initial = false)
@@ -181,15 +157,16 @@ fun SampleApp(wiseSayingViewModel: WiseSayingViewModel) {
                 Text(text = "매일 명언 알림", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Text(text = "매일 9:00 AM에 습관 알림해드려요!", fontSize = 14.sp, color = Color.Gray)
             }
-            Switch(
+            CustomSwitch(
                 checked = isPushNotificationEnabled,
                 onCheckedChange = { isChecked ->
                     wiseSayingViewModel.savePushNotificationPreference(isChecked)
-                },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color(0xFF2196F3),
-                    uncheckedThumbColor = Color(0xFFB0BEC5)
-                )
+                    if (isChecked) {
+                        ShowCurrentToast(context = context, text = "명언 알림을 설정했어요.")
+                    } else {
+                        ShowCurrentToast(context = context, text = "명언 알림을 해제했어요.")
+                    }
+                }
             )
         }
         Row(
@@ -197,14 +174,16 @@ fun SampleApp(wiseSayingViewModel: WiseSayingViewModel) {
         ) {
             Text(
                 "다크 테마 활성화",
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
-            Switch(
+            CustomSwitch(
                 checked = isDarkThemeEnabled,
+                enabled = false,
                 onCheckedChange = { isChecked ->
                     wiseSayingViewModel.saveThemePreference(isChecked)
+                    Toast.makeText(context, "향후 업데이트 예정이니 기다려주세요.", Toast.LENGTH_SHORT).show()
                 }
             )
         }
@@ -212,7 +191,7 @@ fun SampleApp(wiseSayingViewModel: WiseSayingViewModel) {
         ButtonWithIcon(
             text = "공지사항",
             icon = Icons.Default.Notifications,
-            onClick = { /* Handle Notice click */ }
+            onClick = { Toast.makeText(context, "향후 업데이트 예정이니 기다려주세요.", Toast.LENGTH_SHORT).show() }
         )
         ButtonWithIcon(
             text = "별점 주기",
@@ -229,7 +208,25 @@ fun SampleApp(wiseSayingViewModel: WiseSayingViewModel) {
                 context.startActivity(intent)
             }
         )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp), // 화면 여백 추가
+            verticalArrangement = Arrangement.Bottom, // 아래쪽에 배치
+            horizontalAlignment = Alignment.End // 오른쪽 정렬
+        ) {
+            ClickableText(text = AnnotatedString("앱 버전 1.0.0"), onClick = {
+                Toast.makeText(context, "향후 업데이트 예정이니 기다려주세요.", Toast.LENGTH_SHORT).show()
+            })
+        }
     }
+}
+
+fun ShowCurrentToast(context: Context, text: String) {
+    currentToast?.cancel()
+    currentToast = Toast.makeText(context, text, Toast.LENGTH_SHORT)
+    currentToast?.show()
 }
 
 @Composable

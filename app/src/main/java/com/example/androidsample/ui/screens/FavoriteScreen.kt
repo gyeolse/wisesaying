@@ -3,7 +3,10 @@ package com.example.androidsample.ui.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.androidsample.data.model.WiseSaying
+import com.example.androidsample.ui.component.CustomTopAppBar
 import com.example.androidsample.ui.navigation.ScreenInfo
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
@@ -51,7 +55,6 @@ fun FavoriteScreen(navController: NavController,
                    wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
     val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.observeAsState(emptyList())
 
-    // 로그를 통해 상태 변화 감지
     LaunchedEffect(favoriteWiseSayings) {
         wiseSayingViewModel.fetchFavoriteWiseSayings()
         Log.d("FavoriteScreen", "State changed - favoriteWiseSayings.size=${favoriteWiseSayings.size}")
@@ -59,148 +62,125 @@ fun FavoriteScreen(navController: NavController,
     AndroidSampleTheme {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("즐겨찾기", fontSize = 18.sp, fontWeight = FontWeight.Bold,) },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "뒤로 가기"
-                            )
-                        }
-                    },
-                    // [TODO] Need to add Search, Sort functions
-//                    actions = {
-//                        IconButton(onClick = { /* 검색 기능 추가 */ }) {
-//                            Icon(
-//                                imageVector = Icons.Default.Search,
-//                                contentDescription = "검색"
-//                            )
-//                        }
-//                        IconButton(onClick = { /* 정렬 기능 추가 */ }) {
-//                            Icon(
-//                                imageVector = Icons.Default.List,
-//                                contentDescription = "정렬"
-//                            )
-//                        }
-//                    }
+                CustomTopAppBar(
+                    title = "즐겨찾기",
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         ) { paddingValues ->
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                item {
-                    Text(
-                        text = "즐겨찾은 문구들 📚",
-                        fontSize = 18.sp, fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-
                 if (favoriteWiseSayings.isEmpty()) {
-                    item {
+                    // 중앙에 정렬된 텍스트
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
-                            text = "아직 즐겨찾기에 추가된 문구가 없습니다.",
-                            fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                            text = "아직 즐겨찾기에 추가된 문구가 없습니다. 🔥",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 16.dp),
                             textAlign = TextAlign.Center
                         )
                     }
                 } else {
-                    items(favoriteWiseSayings) { wiseSaying ->
-                        QuoteItem(
-                            wiseSaying = wiseSaying,
-                            onClick = {
-                                navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
-                                    Log.d(
-                                        "Navigation",
-                                        "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}"
-                                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(favoriteWiseSayings) { wiseSaying ->
+                            QuoteItem(
+                                wiseSaying = wiseSaying,
+                                onClick = {
+                                    navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
+                                        Log.d(
+                                            "Navigation",
+                                            "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}"
+                                        )
 
-                                    popUpTo(ScreenInfo.Home.route) {
-                                        inclusive = true // HomeScreen 중복 방지
-                                        saveState = false // 상태 저장 필요 없음
+                                        popUpTo(ScreenInfo.Home.route) {
+                                            inclusive = true
+                                            saveState = false
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
-        }
-    }
-//    AndroidSampleTheme {
-//        val scrollState = rememberScrollState()
-//        Log.d("FavoriteScreen", "CALLED=" + favoriteWiseSayings.size.toString() )
-//
-//        LazyColumn(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp)
-//        ) {
-//            items(favoriteWiseSayings) { wiseSaying ->
-//                QuoteItem(
-//                    wiseSaying = wiseSaying,
-//                    onClick = {
-//                        navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
-//                            Log.d("Navigation", "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}")
-//
-//                            popUpTo(ScreenInfo.Home.route) {
-//                                inclusive = true // HomeScreen이 이미 있을 경우 중복 방지
-//                                saveState = false // 새로운 화면으로 이동 시 상태 저장 불필요
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .padding(paddingValues) // TopAppBar 아래 공간 확보
+//                    .padding(horizontal = 16.dp) // 양쪽에 여백 추가
+//            ) {
+//                Text(
+//                    text = "즐겨찾는 문구들 ✏️",
+//                    fontSize = 18.sp, fontWeight = FontWeight.Bold,
+//                    style = MaterialTheme.typography.bodyLarge,
+//                    modifier = Modifier.padding(bottom = 8.dp)
+//                )
+//                LazyColumn(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                ) {
+//                    if (favoriteWiseSayings.isEmpty()) {
+//                        item {
+//                            Column(
+//                                modifier = Modifier
+//                                    .fillMaxSize(), // 전체 화면 크기로 확장
+//                                verticalArrangement = Arrangement.Center, // 수직 중앙 정렬
+//                                horizontalAlignment = Alignment.CenterHorizontally // 수평 중앙 정렬
+//                            ) {
+//                                Text(
+//                                    text = "아직 즐겨찾기에 추가된 문구가 없습니다.",
+//                                    fontSize = 18.sp,
+//                                    fontWeight = FontWeight.Bold,
+//                                    style = MaterialTheme.typography.bodyMedium,
+//                                    color = Color.Gray,
+//                                    modifier = Modifier
+//                                        .padding(horizontal = 16.dp), // 가로 여백 추가
+//                                    textAlign = TextAlign.Center
+//                                )
 //                            }
-//                            launchSingleTop = true
-//                            restoreState = true
+//                        }
+//                    } else {
+//                        items(favoriteWiseSayings) { wiseSaying ->
+//                            QuoteItem(
+//                                wiseSaying = wiseSaying,
+//                                onClick = {
+//                                    navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
+//                                        Log.d(
+//                                            "Navigation",
+//                                            "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}"
+//                                        )
+//
+//                                        popUpTo(ScreenInfo.Home.route) {
+//                                            inclusive = true // HomeScreen 중복 방지
+//                                            saveState = false // 상태 저장 필요 없음
+//                                        }
+//                                        launchSingleTop = true
+//                                        restoreState = true
+//                                    }
+//                                }
+//                            )
 //                        }
 //                    }
-//                )
+//                }
 //            }
-//        }
-//    }
-
-
+        }
+    }
 }
-
-//@Composable
-//fun QuoteItem(
-//    wiseSaying: WiseSaying,
-//    onClick: () -> Unit ) {
-//    Column(
-//        modifier = Modifier
-//            .padding(8.dp)
-//            .clickable { onClick() }
-//    ) {
-//        Text(
-//            text = wiseSaying.contents,
-//            style = MaterialTheme.typography.bodyLarge,
-//            color = Color.Black
-//        )
-//        Spacer(modifier = Modifier.height(4.dp))
-//        Text(
-//            text = "- ${wiseSaying.author}",
-//            style = MaterialTheme.typography.bodyMedium,
-//            color = Color.Gray
-//        )
-//        Spacer(modifier = Modifier.height(2.dp))
-//        Text(
-//            text = "추가된 날짜: ${wiseSaying.isFavoriteAddDate}",
-//            style = MaterialTheme.typography.bodySmall,
-//            color = Color.Gray
-//        )
-//        Spacer(modifier = Modifier.height(12.dp))
-//    }
-//}
 
 @Composable
 fun QuoteItem(
@@ -217,17 +197,33 @@ fun QuoteItem(
     ) {
         Text(
             text = wiseSaying.contents,
-            fontSize = 18.sp, fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Black
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "${wiseSaying.isFavoriteAddDate} - ${wiseSaying.author}",
-            fontSize = 18.sp, fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(
+                text = wiseSaying.author,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            wiseSaying.isFavoriteAddDate?.let {
+                Text(
+                    text = it,
+                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+            }
+        }
     }
 }
 
