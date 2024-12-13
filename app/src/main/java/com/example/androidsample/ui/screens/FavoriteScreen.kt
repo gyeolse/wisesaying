@@ -53,12 +53,9 @@ import java.time.LocalDate
 @Composable
 fun FavoriteScreen(navController: NavController,
                    wiseSayingViewModel: WiseSayingViewModel = hiltViewModel()) {
-    val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.observeAsState(emptyList())
+    val favoriteWiseSayings by wiseSayingViewModel.favoriteWiseSayings.collectAsState()
+    Log.d("FavoriteScreen", "Collected favoriteWiseSayings: ${favoriteWiseSayings.map { it.uid }}")
 
-    LaunchedEffect(favoriteWiseSayings) {
-        wiseSayingViewModel.fetchFavoriteWiseSayings()
-        Log.d("FavoriteScreen", "State changed - favoriteWiseSayings.size=${favoriteWiseSayings.size}")
-    }
     AndroidSampleTheme {
         Scaffold(
             topBar = {
@@ -96,21 +93,14 @@ fun FavoriteScreen(navController: NavController,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(favoriteWiseSayings) { wiseSaying ->
+                            Log.d("FavoriteScreen", "Rendering item with uid=${wiseSaying.uid}")
                             QuoteItem(
                                 wiseSaying = wiseSaying,
                                 onClick = {
                                     navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
-                                        Log.d(
-                                            "Navigation",
-                                            "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}"
-                                        )
-
-                                        popUpTo(ScreenInfo.Home.route) {
-                                            inclusive = true
-                                            saveState = false
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                        popUpTo(ScreenInfo.Home.route) { inclusive = true }
+                                        launchSingleTop = false
+                                        restoreState = false
                                     }
                                 }
                             )
@@ -118,66 +108,6 @@ fun FavoriteScreen(navController: NavController,
                     }
                 }
             }
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(paddingValues) // TopAppBar 아래 공간 확보
-//                    .padding(horizontal = 16.dp) // 양쪽에 여백 추가
-//            ) {
-//                Text(
-//                    text = "즐겨찾는 문구들 ✏️",
-//                    fontSize = 18.sp, fontWeight = FontWeight.Bold,
-//                    style = MaterialTheme.typography.bodyLarge,
-//                    modifier = Modifier.padding(bottom = 8.dp)
-//                )
-//                LazyColumn(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                ) {
-//                    if (favoriteWiseSayings.isEmpty()) {
-//                        item {
-//                            Column(
-//                                modifier = Modifier
-//                                    .fillMaxSize(), // 전체 화면 크기로 확장
-//                                verticalArrangement = Arrangement.Center, // 수직 중앙 정렬
-//                                horizontalAlignment = Alignment.CenterHorizontally // 수평 중앙 정렬
-//                            ) {
-//                                Text(
-//                                    text = "아직 즐겨찾기에 추가된 문구가 없습니다.",
-//                                    fontSize = 18.sp,
-//                                    fontWeight = FontWeight.Bold,
-//                                    style = MaterialTheme.typography.bodyMedium,
-//                                    color = Color.Gray,
-//                                    modifier = Modifier
-//                                        .padding(horizontal = 16.dp), // 가로 여백 추가
-//                                    textAlign = TextAlign.Center
-//                                )
-//                            }
-//                        }
-//                    } else {
-//                        items(favoriteWiseSayings) { wiseSaying ->
-//                            QuoteItem(
-//                                wiseSaying = wiseSaying,
-//                                onClick = {
-//                                    navController.navigate("${ScreenInfo.Home.route}/${wiseSaying.uid}") {
-//                                        Log.d(
-//                                            "Navigation",
-//                                            "Navigating to: ${ScreenInfo.Home.route}/${wiseSaying.uid}"
-//                                        )
-//
-//                                        popUpTo(ScreenInfo.Home.route) {
-//                                            inclusive = true // HomeScreen 중복 방지
-//                                            saveState = false // 상태 저장 필요 없음
-//                                        }
-//                                        launchSingleTop = true
-//                                        restoreState = true
-//                                    }
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//            }
         }
     }
 }

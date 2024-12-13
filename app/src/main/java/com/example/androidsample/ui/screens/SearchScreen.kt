@@ -64,7 +64,7 @@ fun SearchScreen(
         Scaffold(
             topBar = {
                 CustomTopAppBar(
-                    title = "설정",
+                    title = "검색",
                     onBackClick = { navController.popBackStack() }
                 )
             }
@@ -102,7 +102,6 @@ fun AutoCompleteWiseSaying(
             onCancel = { expanded = false }
         )
 
-        // 검색 결과 표시 또는 "지금 바로 추가하기" 버튼
         if (expanded && viewModel.searchResults.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier

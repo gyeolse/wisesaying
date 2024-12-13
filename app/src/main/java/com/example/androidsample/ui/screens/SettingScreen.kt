@@ -4,7 +4,9 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -135,6 +137,7 @@ fun ProfileButtons(wiseSayingViewModel: WiseSayingViewModel) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun SettingButtons(wiseSayingViewModel: WiseSayingViewModel) {
     val context = LocalContext.current

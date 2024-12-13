@@ -39,7 +39,8 @@ class WiseSayingDataRepository @Inject constructor(
     }
 
     suspend fun updateIsFavorite(wiseSaying: WiseSaying) {
-        Log.d(TAG, " Current updateIsFavorite value is=" + wiseSaying.isFavorite)
+        Log.d(TAG, " Current updateIsFavorite value is=${wiseSaying.uid}," +
+                " contents= ${wiseSaying.contents}, isFavorite=${wiseSaying.isFavorite}")
         return wiseDao.updateIsFavorite(wiseSaying)
     }
 
@@ -47,17 +48,14 @@ class WiseSayingDataRepository @Inject constructor(
         return wiseDao.searchWiseSayings("%$query%")
     }
 
-    // 추가: 테마 설정 저장
     suspend fun saveThemePreference(isDarkMode: Boolean) {
         wiseSayingDataStore.saveThemePreference(isDarkMode)
     }
 
-    // 추가: 테마 설정 불러오기
     fun getThemePreference(): Flow<Boolean> {
         return wiseSayingDataStore.getThemePreference()
     }
 
-    // 추가: Push 알림 설정 저장
     @RequiresApi(Build.VERSION_CODES.S)
     suspend fun savePushNotificationPreference(isEnabled: Boolean) {
         wiseSayingDataStore.savePushNotificationPreference(isEnabled)

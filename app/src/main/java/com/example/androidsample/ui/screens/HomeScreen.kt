@@ -86,6 +86,7 @@ import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import android.graphics.Canvas
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.font.FontFamily
 import java.lang.Exception
 
@@ -96,7 +97,7 @@ fun HomeScreen(navController: NavController, viewModel: TodoViewModel = hiltView
                wiseSayingViewModel: WiseSayingViewModel = hiltViewModel(), selectedUid: Int? = null) {
 
     val context = SampleApplication.appContext
-    val wiseSayings by wiseSayingViewModel.wiseSayings
+    val wiseSayings by wiseSayingViewModel.wiseSayings.collectAsState()
 
     AndroidSampleTheme {
         Surface(
@@ -126,24 +127,19 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var hasRandomPageBeenSet by remember { mutableStateOf(false) }
+    var currentSelectedUid by remember { mutableStateOf(selectedUid) }
 
-    // 선택된 uid에 따라 해당 페이지로 스크롤
-    LaunchedEffect(items, selectedUid) {
-        if (selectedUid != null) {
-            val selectedIndex = items.indexOfFirst { it.uid == selectedUid }
+    LaunchedEffect(items, currentSelectedUid) {
+        if (currentSelectedUid != null) {
+            Log.d("HomeScreen", "uid exits. currentUid $currentSelectedUid")
+            val selectedIndex = items.indexOfFirst { it.uid == currentSelectedUid }
             if (selectedIndex >= 0) {
                 pagerState.scrollToPage(selectedIndex)
             }
-        } else {
-            try {
-                if (!hasRandomPageBeenSet) {
-                    val randomIndex = (items.indices).random()
-                    pagerState.scrollToPage(randomIndex)
-                    hasRandomPageBeenSet = true
-                }
-            } catch (e: Exception) {
-                Log.d("HomeScreen", "Exceptions")
-            }
+        } else if (!hasRandomPageBeenSet) {
+            val randomIndex = (items.indices).random()
+            pagerState.scrollToPage(randomIndex)
+            hasRandomPageBeenSet = true
         }
     }
 
@@ -205,32 +201,31 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                                 horizontalArrangement = Arrangement.End,
                             ) {
                                 IconButton(onClick = {
-                                    cardItems = cardItems.mapIndexed { index, cardItem ->
-                                        if (index == page) {
-                                            scope.launch {
-                                                snackbarHostState.currentSnackbarData?.dismiss()
+                                    // 클릭 즉시 UI 상태 업데이트
+                                    val updatedItem = item.copy(isFavorite = if (item.isFavorite == 1) 0 else 1)
+                                    cardItems = cardItems.map { if (it.uid == updatedItem.uid) updatedItem else it }
+                                    currentSelectedUid = updatedItem.uid
 
-                                                if (cardItem.isFavorite == 1) {
-                                                    snackbarHostState.showSnackbar(message = "즐겨찾기에 삭제되었습니다.", duration = SnackbarDuration.Short)
-                                                } else {
-                                                    snackbarHostState.showSnackbar(message = "즐겨찾기에 추가되었습니다.", duration = SnackbarDuration.Short)
-                                                }
-                                            }
-                                            val updateItem = cardItem.copy(isFavorite = (if (cardItem.isFavorite == 1) 0 else 1))
-                                            wiseSayingViewModel.updateIsFavorite(updateItem.uid)
-                                            updateItem
+                                    scope.launch {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                        val message = if (updatedItem.isFavorite == 1) {
+                                            "즐겨찾기에 추가되었습니다."
                                         } else {
-                                            cardItem
+                                            "즐겨찾기에서 삭제되었습니다."
                                         }
+                                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+                                    }
+
+                                    scope.launch {
+                                        wiseSayingViewModel.updateIsFavorite(updatedItem.uid)
                                     }
                                 }) {
                                     Icon(
                                         imageVector = Icons.Filled.Favorite,
                                         contentDescription = "Favorite",
-                                        tint = if (item.isFavorite == 1) Color.Red else Color.Gray,
+                                        tint = if (item.isFavorite == 1) Color.Red else Color.Gray
                                     )
                                 }
-
                                 ShareButton(shareText = "${item.contents} - ${item.author ?: "Unknown"}")
                             }
                             Spacer(modifier = Modifier.height(8.dp))

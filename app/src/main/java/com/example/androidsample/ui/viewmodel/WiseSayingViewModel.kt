@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.internal.format
@@ -32,17 +33,10 @@ class WiseSayingViewModel @Inject constructor(
     private val wiseSayingDataRepository: WiseSayingDataRepository,
 ) : ViewModel() {
 
-    private val _wiseSayings = mutableStateOf<List<WiseSaying>>(emptyList())
-    val wiseSayings: State<List<WiseSaying>> get() = _wiseSayings
-
-//    private val _favoriteWiseSayings = mutableStateOf<List<WiseSaying>>(emptyList())
-//    val favoriteWiseSayings: State<List<WiseSaying>> get() = _favoriteWiseSayings
-
-//    private val _favoriteWiseSayings = MutableStateFlow<List<WiseSaying>>(emptyList())
-//    val favoriteWiseSayings: StateFlow<List<WiseSaying>> = _favoriteWiseSayings
-
-    private val _favoriteWiseSayings = MutableLiveData<List<WiseSaying>>(emptyList())
-    val favoriteWiseSayings: LiveData<List<WiseSaying>> get() = _favoriteWiseSayings
+    private val _wiseSayings = MutableStateFlow<List<WiseSaying>>(emptyList())
+    val wiseSayings: StateFlow<List<WiseSaying>> = _wiseSayings.asStateFlow()
+    private val _favoriteWiseSayings = MutableStateFlow<List<WiseSaying>>(emptyList())
+    val favoriteWiseSayings: StateFlow<List<WiseSaying>> = _favoriteWiseSayings.asStateFlow()
 
     var searchResults by mutableStateOf(listOf<WiseSaying>())
         private set
@@ -78,9 +72,9 @@ class WiseSayingViewModel @Inject constructor(
 
         wisesaying?.let {
             viewModelScope.launch {
-                wiseSayingDataRepository.updateIsFavorite(it.copy(isFavorite = (if(wisesaying.isFavorite == 1) 0 else 1)).apply {
-                    this.uid = it.uid
-                })
+                wiseSayingDataRepository.updateIsFavorite(
+                    it.copy(isFavorite = if (it.isFavorite == 1) 0 else 1)
+                )
                 fetchFavoriteWiseSayings()
                 fetchWiseSayings()
             }
@@ -96,27 +90,22 @@ class WiseSayingViewModel @Inject constructor(
         }
     }
 
-    //  비동기적으로 명언을 가져와서 상태를 업데이트
     private fun fetchWiseSayings() {
         viewModelScope.launch {
             try {
-                val sayings = getAll()
                 _wiseSayings.value = wiseSayingDataRepository.getAll()
-                Log.d("WiseSayingViewModel", "Wise sayings loaded: ${_wiseSayings.value.size} items")
-            } catch(e: Exception) {
-                Log.d("MyViewModel", "Failed to load wise sayings", e)
+            } catch (e: Exception) {
+                Log.d("WiseSayingViewModel", "Failed to load wise sayings", e)
             }
         }
     }
 
-    fun fetchFavoriteWiseSayings() {
+    private fun fetchFavoriteWiseSayings() {
         viewModelScope.launch {
             try {
-                val newFavoriteWiseSayings = wiseSayingDataRepository.getFavoriteList()
-                _favoriteWiseSayings.value = newFavoriteWiseSayings
-//                Log.d(TAG, "fetchFavoriteWiseSayings - Updated favoriteWiseSayings: ${_favoriteWiseSayings.value.size}")
+                _favoriteWiseSayings.value = wiseSayingDataRepository.getFavoriteList()
             } catch (e: Exception) {
-                Log.d(TAG, "fail fetchFavoriteWiseSayings")
+                Log.d("WiseSayingViewModel", "Failed to load favorite wise sayings", e)
             }
         }
     }
@@ -130,16 +119,11 @@ class WiseSayingViewModel @Inject constructor(
 
     fun getThemePreference(): Flow<Boolean> {
         Log.d(TAG, "getThemePreference Called")
-//        viewModelScope.launch {
-//            wiseSayingDataRepository.getThemePreference().collect { isDarkMode ->
-//                Log.d(TAG, "Current theme preference: $isDarkMode")
-//                // 예: _isDarkModeState.value = isDarkMode
-//            }
-//        }
         return wiseSayingDataRepository.getThemePreference()
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun savePushNotificationPreference(isEnabled: Boolean) {
         Log.d(TAG, "savePushNotificationPreference Called isEnabled=${isEnabled}")
         viewModelScope.launch {
