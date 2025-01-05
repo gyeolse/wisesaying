@@ -6,12 +6,16 @@ import com.example.androidsample.data.datasource.database.WiseSayingDatabase
 import WiseSayingDataStore
 import android.content.Context
 import android.os.Build
+import android.provider.Settings.Global
 import androidx.annotation.RequiresApi
 import com.example.androidsample.data.model.WiseSaying
 import com.example.androidsample.receiver.AlarmScheduler
 import com.example.androidsample.util.AlarmPermissionChecker
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -56,24 +60,28 @@ class WiseSayingDataRepository @Inject constructor(
         return wiseSayingDataStore.getThemePreference()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @RequiresApi(Build.VERSION_CODES.S)
     suspend fun savePushNotificationPreference(isEnabled: Boolean) {
-        wiseSayingDataStore.savePushNotificationPreference(isEnabled)
         if (isEnabled) {
             val isPostPushNotificationPermission = AlarmPermissionChecker.isHasPostPushNotificationPermission(context)
             val isHasAlarmPermission = AlarmPermissionChecker.isDailyNoficationPermission(context)
             if ((isPostPushNotificationPermission) && (isHasAlarmPermission)) {
+                wiseSayingDataStore.savePushNotificationPreference(isEnabled)
                 alarmScheduler.scheduleDailyNotification()
             } else {
                 Log.d("WiseSayingDataRepository", "Needs Permissions")
 
                 // [TODO] 수정 필요. 설정 직후, 바로 알람 설정이 가능해야함.
-
                 requestPermissionsIfNeededAndNotify(isPostPushNotificationPermission, isHasAlarmPermission) {
                     alarmScheduler.scheduleDailyNotification()
+                    GlobalScope.launch {
+                        wiseSayingDataStore.savePushNotificationPreference(isEnabled)
+                    }
                 }
             }
         } else {
+            wiseSayingDataStore.savePushNotificationPreference(isEnabled)
             alarmScheduler.cancelDailyNotification()
         }
     }
@@ -85,17 +93,19 @@ class WiseSayingDataRepository @Inject constructor(
 
     // 권한을 요청하고 결과를 콜백으로 받는 함수
     @RequiresApi(Build.VERSION_CODES.S)
-    fun requestPermissionsIfNeededAndNotify(
+    suspend fun requestPermissionsIfNeededAndNotify(
         isPostPushNotificationPermission: Boolean,
         isHasAlarmPermission: Boolean,
         onPermissionsGranted: () -> Unit
     ) {
         if (!isPostPushNotificationPermission) {
+            Log.d(TAG, "isPostPushNotificationPermission is $isPostPushNotificationPermission")
             // 권한 요청 함수 호출
             AlarmPermissionChecker.requestPostPushPermissionToMainActivity(context)
         }
 
         if (!isHasAlarmPermission) {
+            Log.d(TAG, "isHasAlarmPermission is $isHasAlarmPermission")
             // 권한 요청 함수 호출
             AlarmPermissionChecker.requestExactAlarmPermission(context)
         }

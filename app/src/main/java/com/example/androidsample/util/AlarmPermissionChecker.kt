@@ -26,7 +26,7 @@ class AlarmPermissionChecker {
         }
 
         fun requestPostPushPermissionToMainActivity(context: Context) {
-            Log.d(TAG, " Need Permissions")
+            Log.d(TAG, " requestPostPushPermissionToMainActivity Need Permissions")
             val activityIntent = Intent(context, MainActivity::class.java).apply {
                 // FLAG_ACTIVITY_NEW_TASK 플래그 추가
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK

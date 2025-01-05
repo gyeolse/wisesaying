@@ -2,9 +2,12 @@ package com.example.androidsample
 
 import android.content.pm.PackageManager
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -55,15 +58,36 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleCurrentIntent(intent: Intent) {
-        // Intent에서 권한 요청 여부 확인
         val requestPermission = intent.getBooleanExtra("request_permission", false)
+        Log.d("MainActivity", "Request Permission Intent Flag: $requestPermission")
 
         if (requestPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                // 권한 요청
-                Log.d("MainActivity", "Need Permissions")
-                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+            val permissionStatus = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+            Log.d("MainActivity", "Permission Status: $permissionStatus")
+
+            if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
+                if (!shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                    Log.d("MainActivity", "Permission permanently denied")
+                    AlertDialog.Builder(this)
+                        .setTitle("알람 설정 필요")
+                        .setMessage("알람을 설정하기 위해서는 설정에 가서 직접 알람 설정을 켜주세요.")
+                        .setPositiveButton("설정으로 이동") { _, _ ->
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", packageName, null)
+                            }
+                            startActivity(intent)
+                        }
+                        .setNegativeButton("취소", null)
+                        .show()
+                } else {
+                    Log.d("MainActivity", "Requesting POST_NOTIFICATIONS permission")
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+                }
+            } else {
+                Log.d("MainActivity", "Permission already granted")
             }
+        } else {
+            Log.d("MainActivity", "Request Permission not required or OS version not eligible")
         }
     }
 }

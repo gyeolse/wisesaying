@@ -165,9 +165,9 @@ fun SettingButtons(wiseSayingViewModel: WiseSayingViewModel) {
                 onCheckedChange = { isChecked ->
                     wiseSayingViewModel.savePushNotificationPreference(isChecked)
                     if (isChecked) {
-                        ShowCurrentToast(context = context, text = "명언 알림을 설정했어요.")
+//                        ShowCurrentToast(context = context, text = "명언 알림을 설정했어요.")
                     } else {
-                        ShowCurrentToast(context = context, text = "명언 알림을 해제했어요.")
+//                        ShowCurrentToast(context = context, text = "명언 알림을 해제했어요.")
                     }
                 }
             )
