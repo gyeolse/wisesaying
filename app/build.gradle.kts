@@ -109,6 +109,9 @@ dependencies {
     // datastore
     implementation(libs.androidx.datastore.preferences)
 
+    // Google Ads
+    implementation(libs.play.services.ads)
+
     // Kakao API's
     implementation("com.kakao.sdk:v2-user:2.20.1") // 카카오 로그인 API 모듈
     implementation("com.kakao.sdk:v2-share:2.20.1") // 카카오톡 공유 API 모듈

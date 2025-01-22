@@ -4,6 +4,8 @@
         <item name="windowSplashScreenAnimatedIcon">@mipmap/quotes</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/black_100</item> <!-- 추가 -->
         <item name="postSplashScreenTheme">@style/Theme.AndroidSample</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
     <style name="Theme.AndroidSample" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

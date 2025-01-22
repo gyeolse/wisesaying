@@ -3,6 +3,7 @@ agp = "8.3.0"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.1"
 foundation = "1.6.8"
+googleServices = "4.4.2"
 hiltAndroid = "2.49"
 hiltAndroidGradlePlugin = "2.44"
 hiltAndroidGradlePluginVersion = "2.47"
@@ -20,6 +21,7 @@ activityCompose = "1.8.2"
 composeBom = "2023.08.00"
 lifecycleViewmodelCompose = "2.8.3"
 navigationCompose = "2.7.7"
+playServicesAds = "23.6.0"
 roomCommon = "2.5.2"
 roomRuntime = "2.6.1"
 runtimeLivedata = "1.7.1"
@@ -38,6 +40,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltCompilerVersion" }
 hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePlugin" }
 hilt-android-gradle-plugin-v247 = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePluginVersion" }
@@ -59,6 +62,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

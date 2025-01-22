@@ -1,5 +1,6 @@
 package com.example.androidsample.ui.screens
 
+import BannerAdView
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -144,7 +145,10 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState)}
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState)},
+        bottomBar = {
+            BannerAdView(modifier = Modifier.fillMaxWidth().height(50.dp))
+        }
     ) {
         innerPadding ->
         VerticalPager(
@@ -172,7 +176,7 @@ fun SwipeableCardView(items: List<WiseSaying>, wiseSayingViewModel: WiseSayingVi
                                     cardItems = cardItems.mapIndexed { index, cardItem ->
                                         if (index == page) {
                                             cardItem
-                                        } else {
+                                \        } else {
                                             cardItem
                                         }
                                     }

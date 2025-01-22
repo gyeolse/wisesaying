@@ -23,6 +23,7 @@ import com.example.androidsample.receiver.AlarmScheduler
 import com.example.androidsample.ui.navigation.BottomNavigationBar
 import com.example.androidsample.ui.theme.AndroidSampleTheme
 import com.example.androidsample.ui.viewmodel.WiseSayingViewModel
+import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // [TODO] 앱 처음 켰을 때, 권한 설정 로직 추가
+        MobileAds.initialize(this) { }
 
         val intent = intent
         handleCurrentIntent(intent)

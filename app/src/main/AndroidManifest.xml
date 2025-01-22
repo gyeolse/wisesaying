@@ -23,7 +23,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.MySplashScreen">
+            android:theme="@style/Theme.AndroidSample">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -42,6 +42,9 @@
             </intent-filter>
         </activity>
         <receiver android:name=".receiver.AlarmReceiver" android:exported="false" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/> <!-- 실제 ID로 변경 -->
     </application>
 
 </manifest>
