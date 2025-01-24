@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.MySplashScreen" parent="Theme.SplashScreen">
         <item name="android:windowBackground">@color/black_100</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/quotes</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/quote_spoon</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/black_100</item> <!-- 추가 -->
         <item name="postSplashScreenTheme">@style/Theme.AndroidSample</item>
         <item name="windowActionBar">false</item>

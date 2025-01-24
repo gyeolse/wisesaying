@@ -12,11 +12,11 @@ var properties = Properties()
 properties.load(FileInputStream("local.properties"))
 
 android {
-    namespace = "com.example.androidsample"
+    namespace = "com.seyefactory.wisespoon"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.androidsample"
+        applicationId = "com.seyefactory.wisespoon"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
